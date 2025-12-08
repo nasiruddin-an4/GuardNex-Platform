@@ -137,6 +137,7 @@ class MultiLanguagePreprocessor:
         arabic_chars = len(re.findall(r'[\u0600-\u06FF]', text))
         russian_chars = len(re.findall(r'[\u0400-\u04FF]', text))
         greek_chars = len(re.findall(r'[\u0370-\u03FF]', text))
+        hindi_chars = len(re.findall(r'[\u0900-\u097F]', text))  # Devanagari script (Hindi, Sanskrit, etc.)
         
         # Total alphabetic characters (excluding whitespace, digits, and punctuation)
         total_chars = len(re.sub(r'[\s\d\W]', '', text))
@@ -150,9 +151,12 @@ class MultiLanguagePreprocessor:
         arabic_ratio = arabic_chars / max(total_chars, 1)
         russian_ratio = russian_chars / max(total_chars, 1)
         greek_ratio = greek_chars / max(total_chars, 1)
+        hindi_ratio = hindi_chars / max(total_chars, 1)
         
         # Check for non-Latin scripts first (these are definitely unsupported)
-        if chinese_ratio > 0.1:
+        if hindi_ratio > 0.1:
+            return 'hindi'  # Unsupported
+        elif chinese_ratio > 0.1:
             return 'chinese'  # Unsupported
         elif arabic_ratio > 0.1:
             return 'arabic'  # Unsupported
