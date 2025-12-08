@@ -3,32 +3,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { API_URL } from "../../config/api";
 
-const messageTypes = [
-  {
-    id: "email",
-    name: "Email",
-    description: "Check for spam in email messages",
-  },
-  {
-    id: "sms",
-    name: "SMS",
-    description: "Analyze SMS/text messages for spam content",
-  },
-  {
-    id: "social",
-    name: "Social Media",
-    description: "Detect spam in social media posts and messages",
-  },
-];
 
-// Example messages for each platform type
-const exampleMessages = {
-  email:
-    "Dear valued customer, Congratulations! You've been selected to receive a free $1000 gift card. Click here to claim your prize now: http://claim-your-prize.com",
-  sms: "URGENT: Your account has been compromised. Call this number immediately: +1234567890 to verify your identity and prevent unauthorized charges.",
-  social:
-    "😍 OMG! I made $5,000 in just one week working from home! DM me to learn my secret method and start earning passive income today! 💰💯 #earnmoney #workfromhome",
-};
 
 const DetectionForm = ({ onDetectionResult }) => {
   const [message, setMessage] = useState("");
@@ -42,12 +17,7 @@ const DetectionForm = ({ onDetectionResult }) => {
     setCharCount(message.length);
   }, [message]);
 
-  // Focus textarea when messageType changes
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [messageType]);
+
 
   // Auto-resize textarea based on content
   useEffect(() => {
@@ -56,7 +26,7 @@ const DetectionForm = ({ onDetectionResult }) => {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
-  }, [message, messageType]);
+  }, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,7 +109,9 @@ const DetectionForm = ({ onDetectionResult }) => {
   };
 
   const insertExampleMessage = () => {
-    setMessage(exampleMessages[messageType]);
+    // Use a generic spam example
+    const genericExample = "Congratulations! You've won a $1000 gift card! Click here now to claim your prize: http://claim-prize.com. Limited time offer!";
+    setMessage(genericExample);
   };
 
   const autoResize = (e) => {
@@ -157,34 +129,11 @@ const DetectionForm = ({ onDetectionResult }) => {
               Message Analysis
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Enter your message below and select the platform to check if its
-              spam.
+              Enter your message (Email/SMS/Social Media) to check if it's spam.
             </p>
           </div>
 
-          {/* Message Type Selection */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <label className="label">Platform Type</label>
-            <div className="grid grid-cols-3 gap-2 mb-2">
-              {messageTypes.map((type) => (
-                <button
-                  type="button"
-                  key={type.id}
-                  onClick={() => setMessageType(type.id)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg text-sm font-medium transition-all border ${
-                    messageType === type.id
-                      ? "bg-primary-50 border-primary-300 text-primary-700 shadow-sm"
-                      : "hover:bg-gray-100 border-gray-200 text-gray-600"
-                  }`}
-                >
-                  <span>{type.name}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 italic mt-1">
-              {messageTypes.find((t) => t.id === messageType)?.description}
-            </p>
-          </div>
+
 
           {/* Message Input */}
           <div>
@@ -207,7 +156,7 @@ const DetectionForm = ({ onDetectionResult }) => {
                   autoResize(e);
                 }}
                 onInput={autoResize}
-                placeholder={`Enter your ${messageType} message to check for spam...`}
+                placeholder="Enter your message here (Email, SMS, or Social Media)..."
                 className="input font-mono text-sm resize-none custom-scrollbar bg-gray-50 min-h-[144px]"
                 style={{
                   backgroundColor: "#f9fafb",
