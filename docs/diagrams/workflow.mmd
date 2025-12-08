@@ -1,0 +1,73 @@
+flowchart LR
+  %% Actors
+  subgraph Actors
+    U[End User]
+    Admin[Admin]
+  end
+
+  %% Frontend
+  subgraph FE[Frontend (React)]
+    DF[DetectionForm / DetectPage]
+    RC[ResultCard]
+    MLH[MessageLogs (DataTable)]
+    AuthC[Auth (Login/Register)]
+    LS[(localStorage)]
+    ModalView[View Modal]
+    ModalDelete[Delete Confirm Modal]
+  end
+
+  %% Backend & ML & DB
+  subgraph API[Flask API]
+    DET[/POST /api/detect/]
+    MSGS[/GET /api/admin/messages/]
+    DEL[/DELETE /api/admin/messages/{id}/]
+    AUTH[/POST /api/login/]
+    STATS[/GET /api/messages/stats/]
+  end
+
+  ML[Model + Vectorizer]
+  DB[(Postgres DB)]
+  Logs[(Server Logs)]
+
+  %% Flows
+  U -->|login / register| FE
+  FE -->|POST /api/login -> JWT| API
+  API -->|returns JWT| FE
+  FE -->|store JWT in localStorage| LS
+
+  U -->|submit message| DF
+  DF -->|POST /api/detect (Authorization: Bearer JWT)| DET
+  DET -->|vectorize text| ML
+  ML -->|predict (is_spam, confidence)| DET
+  DET -->|INSERT message row| DB
+  DET -->|response {is_spam, confidence, id}| RC
+  RC -->|display result| U
+
+  FE -->|open Message Logs| MLH
+  MLH -->|GET /api/admin/messages (JWT)| MSGS
+  MSGS -->|returns messages[] (with user info)| MLH
+
+  MLH -->|click View icon| ModalView
+  ModalView -.->|no API call (client-only)| MLH
+
+  MLH -->|click Delete icon| ModalDelete
+  ModalDelete -->|on confirm -> DELETE /api/admin/messages/{id}| DEL
+  DEL -->|delete row| DB
+  DEL -->|200 OK| MLH
+  DEL -->|log deletion| Logs
+
+  Admin -->|uses Admin UI| MLH
+
+  API -->|query/analytics| STATS
+  STATS -->|aggregate| DB
+
+  %% Decision styling note
+  classDef spamFill fill:#ffe6e6,stroke:#ff4d4d;
+  classDef okFill fill:#e6fff0,stroke:#22c55e;
+  %% (Use is_spam to color confidence bars: spam -> red, not spam -> green)
+
+  %% Legend
+  subgraph Legend
+    L1[Red bar = Spam]:::spamFill
+    L2[Green bar = Not Spam]:::okFill
+  end
