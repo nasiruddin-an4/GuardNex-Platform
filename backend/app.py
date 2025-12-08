@@ -766,8 +766,8 @@ def predict_spam(current_user):
                 cursor = conn.cursor()
                 logger.info(f"Cursor created, executing insert with: user_id={current_user['id']}, type={message_type}, language={language}, is_spam={is_spam}")
                 cursor.execute(
-                    "INSERT INTO messages (user_id, content, type, is_spam, confidence, spam_indicators, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                    (current_user['id'], message, message_type, is_spam, confidence, json.dumps(indicators), datetime.now(timezone.utc))
+                    "INSERT INTO messages (user_id, content, type, language, is_spam, confidence, spam_indicators, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                    (current_user['id'], message, message_type, language, is_spam, confidence, json.dumps(indicators), datetime.now(timezone.utc))
                 )
                 message_id = cursor.fetchone()
                 logger.info(f"Message ID returned: {message_id}")
