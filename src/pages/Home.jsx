@@ -310,7 +310,7 @@ const Home = () => {
               {/* Step 2 */}
               <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative">
                 <div className="absolute -top-6 left-8 w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white text-lg font-bold">2</div>
-                <h3 className="text-xl font-bold text-gray-900 mt-6 mb-4">AI Analysis</h3>
+                <h3 className="text-xl font-bold text-gray-900 mt-6 mb-4">Machine Learning Analysis</h3>
                 <p className="text-gray-600">
                   Our advanced algorithm analyzes the content using machine learning trained on millions of spam samples.
                 </p>

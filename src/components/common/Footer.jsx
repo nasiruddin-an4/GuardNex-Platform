@@ -30,7 +30,7 @@ const Footer = () => {
             <nav className="flex flex-col space-y-2">
               <Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link>
               <Link to="/detect" className="text-gray-400 hover:text-white transition-colors">Detect Spam</Link>
-              <a href="#about" className="text-gray-400 hover:text-white transition-colors">About</a>
+              <Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link>
             </nav>
           </div>
 
@@ -38,8 +38,8 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Legal</h3>
             <nav className="flex flex-col space-y-2">
-              <a href="#privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+              <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
             </nav>
           </div>
 
