@@ -671,7 +671,7 @@ const DetectionPage = () => {
                             {Math.round((item.confidence || 0) * 100)}% confidence
                           </span>
                         </div>
-                        {item.language && (
+                        {item.language && !isUnsupportedLanguage && (
                           <div className="mt-1 text-xs">
                             <span className="text-gray-500">
                               Language:{" "}
