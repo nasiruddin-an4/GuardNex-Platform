@@ -128,8 +128,17 @@ class MultiLanguagePreprocessor:
     def detect_language(self, text):
         text_lower = text.lower()
         
+        # Character ranges for different scripts
         bengali_chars = len(re.findall(r'[\u0980-\u09FF]', text))
         spanish_chars = len(re.findall(r'[áéíóúñüÁÉÍÓÚÑÜ¿¡àèìòù]', text))
+        
+        # Other language script detection
+        chinese_chars = len(re.findall(r'[\u4E00-\u9FFF]', text))
+        arabic_chars = len(re.findall(r'[\u0600-\u06FF]', text))
+        russian_chars = len(re.findall(r'[\u0400-\u04FF]', text))
+        greek_chars = len(re.findall(r'[\u0370-\u03FF]', text))
+        
+        # Total alphabetic characters (excluding whitespace, digits, and punctuation)
         total_chars = len(re.sub(r'[\s\d\W]', '', text))
         
         if total_chars == 0:
@@ -137,7 +146,26 @@ class MultiLanguagePreprocessor:
         
         bengali_ratio = bengali_chars / max(total_chars, 1)
         spanish_ratio = spanish_chars / max(total_chars, 1)
+        chinese_ratio = chinese_chars / max(total_chars, 1)
+        arabic_ratio = arabic_chars / max(total_chars, 1)
+        russian_ratio = russian_chars / max(total_chars, 1)
+        greek_ratio = greek_chars / max(total_chars, 1)
         
+        # Check for non-Latin scripts first (these are definitely unsupported)
+        if chinese_ratio > 0.1:
+            return 'chinese'  # Unsupported
+        elif arabic_ratio > 0.1:
+            return 'arabic'  # Unsupported
+        elif russian_ratio > 0.1:
+            return 'russian'  # Unsupported
+        elif greek_ratio > 0.1:
+            return 'greek'  # Unsupported
+        
+        # Check for Bangla
+        if bengali_ratio > 0.1:
+            return 'bangla'
+        
+        # Check for Spanish with more strict criteria
         spanish_indicators = [
             'gratis', 'ganar', 'dinero', 'premio', 'oferta', 'urgente', 'garantía',
             'descuento', 'felicitaciones', 'euros', 'dólares', 'hola', 'cómo',
@@ -146,13 +174,23 @@ class MultiLanguagePreprocessor:
         spanish_word_count = sum(1 for word in spanish_indicators if word in text_lower)
         has_spanish_punctuation = bool(re.search(r'[¿¡]', text))
         
-        if bengali_ratio > 0.1:
-            return 'bangla'
-        elif (spanish_ratio > 0.01 or spanish_word_count >= 1 or has_spanish_punctuation or
-              any(word in text_lower for word in ['gratis', 'ganar', 'dinero', 'euros'])):
+        # Spanish detection: either has Spanish-specific punctuation, or has multiple Spanish keywords
+        if has_spanish_punctuation or spanish_word_count >= 2:
             return 'spanish'
-        else:
-            return 'english'
+        
+        # If it has Spanish accent chars or some Spanish words, check more carefully
+        if spanish_ratio > 0.01:
+            # Check if it's French (similar accents but different words)
+            french_words = ['bonjour', 'merci', 'français', 'avec', 'mais', 'être', 'avoir', 'aller', 'pouvoir']
+            if any(word in text_lower for word in french_words):
+                return 'french'  # Unsupported
+            # Otherwise likely Spanish
+            if spanish_word_count >= 1:
+                return 'spanish'
+            return 'french'  # Default to French if has accents but no English/Spanish words
+        
+        # Default to English for anything else (Latin characters)
+        return 'english'
 
     def preprocess_text(self, text, language):
         text = text.lower().strip()
@@ -588,6 +626,22 @@ def predict_spam(current_user):
 
         preprocessor = MultiLanguagePreprocessor()
         language = preprocessor.detect_language(message)
+        logger.info(f"Detected language: {language} for message: {message[:50]}...")
+        
+        # Validate that language is supported (only Bangla, English, Spanish)
+        supported_languages = ['bangla', 'english', 'spanish']
+        if language not in supported_languages:
+            logger.warning(f"Unsupported language detected: {language}")
+            return jsonify({
+                'error': 'Oops! This language isn\'t supported yet. Try again with Bangla, English, or Spanish.',
+                'language': language,
+                'supported_languages': supported_languages,
+                'isSpam': None,
+                'confidence': 0,
+                'type': message_type,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'originalMessage': message
+            }), 400
         
         indicators = {
             'spam_keywords': 0,

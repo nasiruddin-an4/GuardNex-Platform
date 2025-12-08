@@ -104,8 +104,28 @@ const DetectionForm = ({ onDetectionResult }) => {
       toast.success("Detection completed successfully");
     } catch (error) {
       console.error("Detection error:", error);
+      
+      // Check for language support error (400 status from axios)
+      if (error.response?.status === 400 && error.response?.data?.error?.includes("language isn't supported")) {
+        const errorData = error.response.data;
+        toast.error(errorData.error);
+        onDetectionResult({
+          message,
+          type: messageType,
+          isSpam: null,
+          confidence: 0,
+          language: errorData.language,
+          unsupportedLanguage: true,
+          error: errorData.error,
+          timestamp: new Date().toISOString(),
+        });
+        setLoading(false);
+        return;
+      }
+
       toast.error(
         error.response?.data?.message ||
+          error.response?.data?.error ||
           "Error detecting spam. Please try again."
       );
     } finally {

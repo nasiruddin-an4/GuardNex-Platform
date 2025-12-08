@@ -15,6 +15,59 @@ const ResultCard = ({ result }) => {
   
   if (!result) return null
   
+  // Handle unsupported language error
+  if (result.unsupportedLanguage || result.error?.includes("language isn't supported")) {
+    return (
+      <div className={`rounded-lg border border-orange-200 bg-orange-50 overflow-hidden transition-all duration-500 ${isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-4'}`}>
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row items-center">
+            <div className="flex-shrink-0 mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0 0v2m0-8v-2m0 0V7m0 0H7m5 0h5M8 8a3 3 0 110 6 3 3 0 010-6zm8 0a3 3 0 110 6 3 3 0 010-6z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-orange-800">
+                Language Not Supported
+              </h3>
+              
+              <div className="mt-3 p-4 bg-white rounded-lg border border-orange-200">
+                <p className="text-sm font-semibold text-gray-800 mb-2">
+                  Oops! This language isn't supported yet.
+                </p>
+                <p className="text-sm text-gray-700 mb-3">
+                  Try again with Bangla, English, or Spanish.
+                </p>
+                <div className="flex gap-2">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    🇧🇩 Bangla
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    🇬🇧 English
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    🇪🇸 Spanish
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Your message:</h4>
+                <p className="text-gray-600 whitespace-pre-wrap text-sm break-words">{result.message}</p>
+              </div>
+
+              {result.language && (
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>Detected language: <span className="font-semibold capitalize">{result.language}</span></p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
   const { isSpam, confidence, message, type, timestamp } = result
   const formattedDate = new Date(timestamp).toLocaleString()
   
