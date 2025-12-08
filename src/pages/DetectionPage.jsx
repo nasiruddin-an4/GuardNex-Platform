@@ -609,64 +609,81 @@ const DetectionPage = () => {
                   detections
                 </div>
                 <div className="space-y-3 max-h-[calc(100vh-310px)] overflow-y-auto pr-2">
-                  {filteredHistory.map((item, index) => (
-                    <div
-                      key={item.id || index}
-                      className={`p-3 rounded-lg text-sm border transition-all hover:shadow-md cursor-pointer ${
-                        item.isSpam
-                          ? "bg-red-50 border-red-200"
-                          : "bg-green-50 border-green-200"
-                      }`}
-                      onClick={() => {
-                        setResult(item);
-                        setActiveTab("form");
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`font-medium ${
-                              item.isSpam ? "text-red-700" : "text-green-700"
-                            }`}
-                          >
-                            {item.isSpam ? "Spam" : "Not Spam"}
-                          </span>
-                          {item.source === "api" && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
-                              Synced
+                  {filteredHistory.map((item, index) => {
+                    // Check if language is not supported
+                    const isUnsupportedLanguage = item.unsupportedLanguage || item.error?.includes("language isn't supported");
+                    
+                    // Determine card styling based on status
+                    let cardBgColor, cardBorderColor, statusTextColor, statusLabel;
+                    
+                    if (isUnsupportedLanguage) {
+                      cardBgColor = "bg-orange-50";
+                      cardBorderColor = "border-orange-200";
+                      statusTextColor = "text-orange-700";
+                      statusLabel = "Language Not Supported";
+                    } else if (item.isSpam) {
+                      cardBgColor = "bg-red-50";
+                      cardBorderColor = "border-red-200";
+                      statusTextColor = "text-red-700";
+                      statusLabel = "Spam";
+                    } else {
+                      cardBgColor = "bg-green-50";
+                      cardBorderColor = "border-green-200";
+                      statusTextColor = "text-green-700";
+                      statusLabel = "Not Spam";
+                    }
+                    
+                    return (
+                      <div
+                        key={item.id || index}
+                        className={`p-3 rounded-lg text-sm border transition-all hover:shadow-md cursor-pointer ${cardBgColor} ${cardBorderColor}`}
+                        onClick={() => {
+                          setResult(item);
+                          setActiveTab("form");
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${statusTextColor}`}>
+                              {statusLabel}
                             </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(item.timestamp).toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 truncate">
-                        {item.message || item.originalMessage}
-                      </p>
-                      <div className="mt-1 text-xs flex justify-between">
-                        <span className="text-gray-500">
-                          Type:{" "}
-                          <span className="font-medium capitalize">
-                            {item.type || "email"}
+                            {item.source === "api" && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                                Synced
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(item.timestamp).toLocaleTimeString()}
                           </span>
-                        </span>
-                        <span className="text-gray-500">
-                          {Math.round((item.confidence || 0) * 100)}% confidence
-                        </span>
-                      </div>
-                      {item.language && (
-                        <div className="mt-1 text-xs">
+                        </div>
+                        <p className="text-gray-700 truncate">
+                          {item.message || item.originalMessage}
+                        </p>
+                        <div className="mt-1 text-xs flex justify-between">
                           <span className="text-gray-500">
-                            Language:{" "}
+                            Type:{" "}
                             <span className="font-medium capitalize">
-                              {item.language}
+                              {item.type || "email"}
                             </span>
                           </span>
+                          <span className="text-gray-500">
+                            {Math.round((item.confidence || 0) * 100)}% confidence
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {item.language && (
+                          <div className="mt-1 text-xs">
+                            <span className="text-gray-500">
+                              Language:{" "}
+                              <span className="font-medium capitalize">
+                                {item.language}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </>
             ) : (
