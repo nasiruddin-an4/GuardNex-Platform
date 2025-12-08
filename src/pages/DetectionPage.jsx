@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import DetectionForm from "../components/detection/DetectionForm";
 import ResultCard from "../components/detection/ResultCard";
+import { useAuth } from "../contexts/AuthContext";
 
 const DetectionPage = () => {
+  const { user } = useAuth();
   const [result, setResult] = useState(null);
   const [detectionHistory, setDetectionHistory] = useState([]);
   const [isFilteringSpam, setIsFilteringSpam] = useState(false);
@@ -12,29 +14,19 @@ const DetectionPage = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState(null);
 
-  // Load detection history from localStorage and API on initial render
+  // Load detection history when user changes
   useEffect(() => {
     loadDetectionHistory();
-  }, []);
+  }, [user]);
 
   const loadDetectionHistory = async () => {
     setIsLoadingHistory(true);
     setHistoryError(null);
 
-    // First, load from localStorage
-    const savedHistory = localStorage.getItem("detectionHistory");
-    if (savedHistory) {
-      try {
-        const localHistory = JSON.parse(savedHistory);
-        setDetectionHistory(localHistory);
-      } catch (error) {
-        console.error("Failed to parse local detection history", error);
-      }
-    }
-
-    // Then try to load from API if user is authenticated
     const token = localStorage.getItem("token");
+    
     if (token) {
+      // User is authenticated - load from API (server-side user-specific data)
       try {
         const response = await fetch("/api/messages/history", {
           headers: {
@@ -45,45 +37,40 @@ const DetectionPage = () => {
         if (response.ok) {
           const data = await response.json();
           if (data.history && data.history.length > 0) {
-            // Merge with localStorage data, prioritizing API data
+            // Use API data directly for authenticated users
             const apiHistory = data.history.map((item) => ({
               ...item,
               source: "api",
             }));
 
-            // Get localStorage data that's not in API
-            const localOnlyHistory = detectionHistory.filter(
-              (localItem) =>
-                !apiHistory.some(
-                  (apiItem) =>
-                    apiItem.message === localItem.message &&
-                    Math.abs(
-                      new Date(apiItem.timestamp) -
-                        new Date(localItem.timestamp)
-                    ) < 60000
-                )
-            );
+            setDetectionHistory(apiHistory);
 
-            const mergedHistory = [...apiHistory, ...localOnlyHistory].slice(
-              0,
-              100
-            );
-            setDetectionHistory(mergedHistory);
-
-            // Update localStorage with merged data
+            // Store in localStorage for offline access and quick loading
             localStorage.setItem(
               "detectionHistory",
-              JSON.stringify(mergedHistory)
+              JSON.stringify(apiHistory)
             );
+            // Also store current user ID to validate history ownership on page load
+            const userId = localStorage.getItem("userId");
+            localStorage.setItem("detectionHistoryUserId", userId);
           }
         } else if (response.status === 401) {
-          // Token expired or invalid, clear it
+          // Token expired or invalid, clear authentication data
           localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("detectionHistory");
+          localStorage.removeItem("detectionHistoryUserId");
+          setHistoryError("Your session has expired. Please log in again.");
         }
       } catch (error) {
         console.error("Failed to load history from API:", error);
-        setHistoryError("Failed to sync with server. Using local data only.");
+        setHistoryError("Failed to sync with server. Please try again.");
       }
+    } else {
+      // User is not authenticated - clear any previous user's history
+      localStorage.removeItem("detectionHistory");
+      localStorage.removeItem("detectionHistoryUserId");
+      setDetectionHistory([]);
     }
 
     setIsLoadingHistory(false);

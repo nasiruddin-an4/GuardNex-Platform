@@ -44,8 +44,13 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(`${API_URL}/auth/login`, { email, password })
       const { token, user } = response.data
       
-      // Store token in localStorage
+      // Clear previous user's history and data
+      localStorage.removeItem('detectionHistory')
+      localStorage.removeItem('detectionHistoryUserId')
+      
+      // Store token and user ID in localStorage
       localStorage.setItem('token', token)
+      localStorage.setItem('userId', user.id)
       
       // Set auth header for all future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -66,6 +71,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, { name, email, password })
+      
+      // Clear any previous user's history after registration
+      localStorage.removeItem('detectionHistory')
+      localStorage.removeItem('detectionHistoryUserId')
+      
       return { success: true, message: response.data.message }
     } catch (error) {
       console.error('Registration failed', error.response?.data || error.message)
@@ -151,7 +161,12 @@ export const AuthProvider = ({ children }) => {
   };
   
   const logout = () => {
+    // Clear all user-specific data
     localStorage.removeItem('token')
+    localStorage.removeItem('userId')
+    localStorage.removeItem('detectionHistory')
+    localStorage.removeItem('detectionHistoryUserId')
+    
     delete axios.defaults.headers.common['Authorization']
     setUser(null)
     setIsAuthenticated(false)

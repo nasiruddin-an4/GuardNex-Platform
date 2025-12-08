@@ -58,7 +58,7 @@ const ResultCard = ({ result }) => {
 
               {result.language && (
                 <div className="mt-4 text-sm text-gray-600">
-                  <p>Detected language: <span className="font-semibold capitalize">{result.language}</span></p>
+                  {/* <p>Detected language: <span className="font-semibold capitalize">{result.language}</span></p> */}
                 </div>
               )}
             </div>
