@@ -440,21 +440,46 @@ def register():
         conn = get_db_connection()
         if not conn:
             return jsonify({'message': 'Database unavailable'}), 500
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         if cursor.fetchone():
+            cursor.close()
+            conn.close()
             return jsonify({'message': 'Email already registered'}), 409
         
         hashed_password = generate_password_hash(password)
-        cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s) RETURNING id", (name, email, hashed_password))
-        user_id = cursor.fetchone()[0]
+        cursor.execute(
+            "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s) RETURNING id, name, email, role",
+            (name, email, hashed_password, 'user')
+        )
+        user = cursor.fetchone()
         
         conn.commit()
         cursor.close()
         conn.close()
         
-        return jsonify({'message': 'User registered successfully', 'user_id': user_id}), 201
+        # Generate JWT token for automatic login
+        token_payload = {
+            'user_id': user['id'],
+            'email': user['email'],
+            'role': user['role'],
+            'exp': datetime.now(timezone.utc) + timedelta(seconds=app.config['JWT_EXPIRATION'])
+        }
+        
+        token = jwt.encode(payload=token_payload, key=app.config['SECRET_KEY'], algorithm="HS256")
+        
+        # Return token and user info (same as login endpoint)
+        return jsonify({
+            'message': 'User registered successfully',
+            'token': token,
+            'user': {
+                'id': user['id'],
+                'name': user['name'],
+                'email': user['email'],
+                'role': user['role']
+            }
+        }), 201
     except Exception as e:
         return jsonify({'message': 'Registration failed', 'error': str(e)}), 500
 

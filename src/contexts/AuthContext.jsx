@@ -76,7 +76,24 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('detectionHistory')
       localStorage.removeItem('detectionHistoryUserId')
       
-      return { success: true, message: response.data.message }
+      // Check if backend returned token (auto-login)
+      if (response.data.token && response.data.user) {
+        const { token, user } = response.data
+        
+        // Store token and user ID in localStorage
+        localStorage.setItem('token', token)
+        localStorage.setItem('userId', user.id)
+        
+        // Set auth header for all future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        
+        setUser(user)
+        setIsAuthenticated(true)
+        
+        return { success: true, message: response.data.message, autoLogin: true, user }
+      }
+      
+      return { success: true, message: response.data.message, autoLogin: false }
     } catch (error) {
       console.error('Registration failed', error.response?.data || error.message)
       return { 

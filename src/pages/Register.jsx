@@ -134,8 +134,15 @@ const Register = () => {
       const result = await register(name, email, password)
       
       if (result.success) {
-        toast.success('Registration successful! Please log in.')
-        navigate('/login')
+        if (result.autoLogin) {
+          // User is automatically logged in, redirect to detection page
+          toast.success('Account created successfully! Welcome to GuardNex.')
+          navigate('/detect')
+        } else {
+          // Fallback: redirect to login page if auto-login failed
+          toast.success('Registration successful! Please log in.')
+          navigate('/login')
+        }
       } else {
         toast.error(result.error)
       }
