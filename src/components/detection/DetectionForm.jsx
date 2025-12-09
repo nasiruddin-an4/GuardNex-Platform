@@ -74,7 +74,7 @@ const DetectionForm = ({ onDetectionResult }) => {
       toast.success("Detection completed successfully");
     } catch (error) {
       console.error("Detection error:", error);
-      
+
       // Check for language support error (400 status from axios)
       if (error.response?.status === 400 && error.response?.data?.error?.includes("language isn't supported")) {
         const errorData = error.response.data;
@@ -95,8 +95,8 @@ const DetectionForm = ({ onDetectionResult }) => {
 
       toast.error(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error detecting spam. Please try again."
+        error.response?.data?.error ||
+        "Error detecting spam. Please try again."
       );
     } finally {
       setLoading(false);
@@ -109,9 +109,21 @@ const DetectionForm = ({ onDetectionResult }) => {
   };
 
   const insertExampleMessage = () => {
-    // Use a generic spam example
-    const genericExample = "Congratulations! You've won a $1000 gift card! Click here now to claim your prize: http://claim-prize.com. Limited time offer!";
-    setMessage(genericExample);
+    let example = "";
+    switch (messageType) {
+      case "email":
+        example = "Subject: URGENT! Claim your $1000 prize now!\n\nCongratulation! You have been selected as a winner for our annual lottery. Click here to claim your prize: http://claim-prize-now.com/secure-login\n\nThis offer expires in 24 hours. Act fast!";
+        break;
+      case "sms":
+        example = "URGENT: Your account has been locked due to suspicious activity. Verify immediately at http://secure-bank-alert.com/verify or call 555-0192.";
+        break;
+      case "social_media":
+        example = "Hey! specially for you, I found this amazing investment opportunity. You can double your money in just 2 days! Join my telegram channel now: t.me/crypto_king_100x";
+        break;
+      default:
+        example = "Congratulations! You've won a $1000 gift card! Click here now to claim your prize: http://claim-prize.com. Limited time offer!";
+    }
+    setMessage(example);
   };
 
   const autoResize = (e) => {
@@ -135,6 +147,88 @@ const DetectionForm = ({ onDetectionResult }) => {
 
 
 
+
+          {/* Platform Selection */}
+          <div className="space-y-3">
+            <label className="label">Select Platform</label>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setMessageType("email")}
+                className={`flex gap-3 items-center justify-center p-3 rounded-lg border transition-all ${messageType === "email"
+                  ? "bg-primary-50 border-primary-500 text-primary-700 ring-1 ring-primary-500"
+                  : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Email</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMessageType("sms")}
+                className={`flex gap-3 items-center justify-center p-3 rounded-lg border transition-all ${messageType === "sms"
+                  ? "bg-primary-50 border-primary-500 text-primary-700 ring-1 ring-primary-500"
+                  : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">SMS</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMessageType("social_media")}
+                className={`flex gap-3 items-center justify-center p-3 rounded-lg border transition-all ${messageType === "social_media"
+                  ? "bg-primary-50 border-primary-500 text-primary-700 ring-1 ring-primary-500"
+                  : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Social Media</span>
+              </button>
+            </div>
+          </div>
+
           {/* Message Input */}
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -156,7 +250,13 @@ const DetectionForm = ({ onDetectionResult }) => {
                   autoResize(e);
                 }}
                 onInput={autoResize}
-                placeholder="Enter your message here (Email, SMS, or Social Media)..."
+                placeholder={
+                  messageType === "email"
+                    ? "Paste the email subject and body here..."
+                    : messageType === "sms"
+                      ? "Paste the SMS content here..."
+                      : "Paste the social media post or comment here..."
+                }
                 className="input font-mono text-sm resize-none custom-scrollbar bg-gray-50 min-h-[144px]"
                 style={{
                   backgroundColor: "#f9fafb",
