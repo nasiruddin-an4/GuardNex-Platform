@@ -215,20 +215,20 @@ def load_training_data():
     
     dataset_configs = {
         'emails.csv': {
-            'text_cols': ['text', 'message', 'email', 'content', 'body', 'v2'],
-            'label_cols': ['label', 'spam', 'category', 'class', 'v1']
+            'text_cols': ['text', 'message', 'email', 'content', 'body', 'v2', 'TEXT', 'MESSAGE'],
+            'label_cols': ['label', 'spam', 'category', 'class', 'v1', 'LABEL', 'SPAM']
         },
         'Bangla_Email_Dataset.csv': {
-            'text_cols': ['text', 'message', 'email', 'content', 'body'],
-            'label_cols': ['label', 'spam', 'category', 'class']
+            'text_cols': ['text', 'message', 'email', 'content', 'body', 'TEXT', 'MESSAGE'],
+            'label_cols': ['label', 'spam', 'category', 'class', 'LABEL', 'SPAM']
         },
         'Dataset_5971.csv': {
-            'text_cols': ['text', 'message', 'email', 'content', 'body'],
-            'label_cols': ['label', 'spam', 'category', 'class']
+            'text_cols': ['text', 'message', 'email', 'content', 'body', 'TEXT', 'MESSAGE'],
+            'label_cols': ['label', 'spam', 'category', 'class', 'LABEL', 'SPAM']
         },
         'spanish_spam.csv': {
-            'text_cols': ['text', 'message', 'email', 'content', 'texto', 'mensaje'],
-            'label_cols': ['label', 'spam', 'category', 'class', 'etiqueta']
+            'text_cols': ['text', 'message', 'email', 'content', 'texto', 'mensaje', 'TEXT', 'MESSAGE'],
+            'label_cols': ['label', 'spam', 'category', 'class', 'etiqueta', 'LABEL', 'SPAM']
         }
     }
     
@@ -248,15 +248,27 @@ def load_training_data():
                 else:
                     continue
                 
-                text_col = next((col for col in config['text_cols'] if col in df.columns), None)
-                label_col = next((col for col in config['label_cols'] if col in df.columns), None)
+                # Case-insensitive column matching
+                df_columns_lower = {col.lower(): col for col in df.columns}
+                
+                text_col = None
+                for col in config['text_cols']:
+                    if col.lower() in df_columns_lower:
+                        text_col = df_columns_lower[col.lower()]
+                        break
+                        
+                label_col = None
+                for col in config['label_cols']:
+                    if col.lower() in df_columns_lower:
+                        label_col = df_columns_lower[col.lower()]
+                        break
                 
                 if text_col and label_col:
                     df = df.dropna(subset=[text_col, label_col])
                     df[label_col] = df[label_col].astype(str).str.lower().str.strip()
                     
                     def map_label(label):
-                        if label in ['spam', '1', 'yes', 'true', 'si']:
+                        if label in ['spam', '1', 'yes', 'true', 'si', 'smishing']:
                             return 1
                         elif label in ['ham', '0', 'no', 'false']:
                             return 0
@@ -321,10 +333,11 @@ def load_training_data():
             ("Nos vemos mañana en la reunión.", 0, 'spanish'),
             ("Feliz cumpleaños! Que tengas un gran día.", 0, 'spanish'),
             ("El clima hoy está muy agradable.", 0, 'spanish'),
+            ("El clima hoy está muy agradable.", 0, 'spanish'),
         ]
 
-    for text, label, lang in synthetic_data:
-        datasets.append({'text': text, 'label': label, 'language': lang, 'source': 'synthetic'})
+        for text, label, lang in synthetic_data:
+            datasets.append({'text': text, 'label': label, 'language': lang, 'source': 'synthetic'})
 
     return pd.DataFrame(datasets)
 
