@@ -42,7 +42,7 @@ const AnalyticsPage = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           throw new Error('No authentication token found');
         }
@@ -85,13 +85,13 @@ const AnalyticsPage = () => {
     fetchAnalytics();
     // Set up auto-refresh every 5 minutes
     const refreshInterval = setInterval(fetchAnalytics, 5 * 60 * 1000);
-    
+
     return () => clearInterval(refreshInterval);
   }, []);
 
   // Prepare chart data from API response
   const lineChartData = {
-    labels: stats.messagesByPeriod && stats.messagesByPeriod.length > 0 
+    labels: stats.messagesByPeriod && stats.messagesByPeriod.length > 0
       ? stats.messagesByPeriod.map(item => item.period?.split('T')[0] || 'N/A')
       : [],
     datasets: [
@@ -153,12 +153,12 @@ const AnalyticsPage = () => {
   }
 
   return (
-    <div className="">
+    <div className="px-10 py-5">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Analytics Dashboard</h1>
         <p className="text-gray-500 mt-1">Real-time spam detection analytics and insights</p>
       </div>
-      
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -224,8 +224,8 @@ const AnalyticsPage = () => {
           <h3 className="text-lg font-semibold mb-4 text-gray-900">Message Trends</h3>
           {stats.messagesByPeriod && stats.messagesByPeriod.length > 0 ? (
             <div className="h-[400px]">
-              <Line 
-                data={lineChartData} 
+              <Line
+                data={lineChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
@@ -252,7 +252,7 @@ const AnalyticsPage = () => {
           <h3 className="text-lg font-semibold mb-4 text-gray-900">Detection Accuracy by Channel</h3>
           {Object.keys(stats.accuracyByChannel || {}).length > 0 ? (
             <div className="h-[400px]">
-              <Bar 
+              <Bar
                 data={barChartData}
                 options={{
                   responsive: true,

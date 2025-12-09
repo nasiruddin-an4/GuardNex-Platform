@@ -146,11 +146,10 @@ const MessageLogs = () => {
       accessor: "is_spam",
       Cell: ({ value }) => (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            value
-              ? "bg-red-100 text-red-800 border border-red-200"
-              : "bg-green-100 text-green-800 border border-green-200"
-          }`}
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${value
+            ? "bg-red-100 text-red-800 border border-red-200"
+            : "bg-green-100 text-green-800 border border-green-200"
+            }`}
         >
           {value ? "Spam ⚠️" : "Not Spam ✅"}
         </span>
@@ -167,9 +166,8 @@ const MessageLogs = () => {
             <span className="mr-2">{percent}%</span>
             <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full ${
-                  isSpam ? "bg-red-500" : "bg-green-500"
-                }`}
+                className={`h-full rounded-full ${isSpam ? "bg-red-500" : "bg-green-500"
+                  }`}
                 style={{ width: `${percent}%` }}
               ></div>
             </div>
@@ -240,7 +238,7 @@ const MessageLogs = () => {
   };
 
   return (
-    <div className="">
+    <div className="px-10 py-5">
       <div className="mb-6">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-2">
           Message Logs

@@ -204,9 +204,8 @@ const DataTable = ({
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
                 >
                   <div
-                    className={`flex items-center gap-2 ${
-                      column.sortable !== false ? "cursor-pointer group" : ""
-                    }`}
+                    className={`flex items-center gap-2 ${column.sortable !== false ? "cursor-pointer group" : ""
+                      }`}
                     onClick={() =>
                       column.sortable !== false && requestSort(column.accessor)
                     }
@@ -234,11 +233,10 @@ const DataTable = ({
               currentItems.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className={`${
-                    selectedRows.includes(rowIndex)
+                  className={`${selectedRows.includes(rowIndex)
                       ? "bg-blue-50 border-l-4 border-blue-500"
                       : "hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {selectable && (
                     <td className="pl-6 pr-3 py-4">
@@ -255,9 +253,9 @@ const DataTable = ({
                     <td key={colIndex} className="px-6 py-4 text-sm">
                       {column.Cell
                         ? column.Cell({
-                            value: row[column.accessor],
-                            row,
-                          })
+                          value: row[column.accessor],
+                          row,
+                        })
                         : row[column.accessor]}
                     </td>
                   ))}
@@ -305,7 +303,7 @@ const DataTable = ({
 
           <div className="flex items-center gap-4">
             <select
-              className="border rounded-lg px-3 py-1.5 text-sm"
+              className="bg-white border rounded-lg px-3 py-1.5 text-sm"
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
@@ -354,11 +352,10 @@ const DataTable = ({
                   <button
                     key={idx}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-2 rounded-lg text-sm border ${
-                      pageNum === currentPage
+                    className={`px-3 py-2 rounded-lg text-sm border ${pageNum === currentPage
                         ? "bg-blue-600 text-white border-blue-600"
                         : "hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     {pageNum}
                   </button>
